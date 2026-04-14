@@ -25,12 +25,17 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # if yes, make photo name with time stamp, put in uploads folder, and send success message
 @app.route("/upload", methods=["POST"])
 def upload():
-    if "photo" not in request.files:
+    #request and verify photo data from esp32
+    #data is sent in raw jpeg bytes instead of multipart form data
+    photo_data = request.data
+    if not photo_data
         return jsonify({"error": "no photo received"}), 400
     photo = request.files["photo"]
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"bird_{timestamp}.jpeg"
-    photo.save(os.path.join(UPLOAD_FOLDER, filename))
+    #write raw bytes to file
+    with open(os.path.join(UPLOAD_FOLDER, filename), 'wb') as f:
+        f.write(photo_data)
     print(f"saved: {filename}")
     return jsonify({"message": "photo saved"}), 200
 
